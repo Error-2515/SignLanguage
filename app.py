@@ -3,6 +3,7 @@ from keras.utils import to_categorical
 from keras.models import model_from_json
 from keras.layers import LSTM, Dense
 from keras.callbacks import TensorBoard
+# import streamlit as st
 json_file = open("model.json", "r")
 model_json = json_file.read()
 json_file.close()
@@ -32,24 +33,38 @@ threshold = 0.8
 cap = cv2.VideoCapture(0)
 # cap = cv2.VideoCapture("https://192.168.43.41:8080/video")
 # Set mediapipe model 
+# fourcc = cv2.VideoWriter_fourcc(*'XVID')
+# out = None
+
 with mp_hands.Hands(
     model_complexity=0,
     min_detection_confidence=0.5,
     min_tracking_confidence=0.5) as hands:
+    # out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640, 480))
+    # frame_slot = st.empty()
+    
+    
     while cap.isOpened():
 
         # Read feed
         ret, frame = cap.read()
         #flip cam horizontally
         frame = cv2.flip(frame, 1)
+        # rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        # Write the frame to the video file
+        # if out is not None:
+        #     out.write(rgb_frame)
 
 
         # Make detections
-        cropframe=frame[40:400,0:300]
+        # cropframe=frame[40:400,0:300]
+
+        cropframe=frame
         # print(frame.shape)
         # cropframe = cv2.flip(cropframe, 1)
 
-        frame=cv2.rectangle(frame,(0,40),(300,400),255,2)
+        # frame=cv2.rectangle(frame,(0,40),(300,400),255,2)
         # frame=cv2.putText(frame,"Active Region",(75,25),cv2.FONT_HERSHEY_COMPLEX_SMALL,2,255,2)
         image, results = mediapipe_detection(cropframe, hands)
         # print(results)
@@ -90,11 +105,12 @@ with mp_hands.Hands(
             pass
             
         cv2.rectangle(frame, (0,0), (300, 40), (245, 117, 16), -1)
-        cv2.putText(frame,"Output: -"+' '.join(sentence)+''.join(accuracy), (3,30), 
+        cv2.putText(frame,"Output: -"+' '.join(sentence), (3,30), 
                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
         
         # Show to screen
         cv2.imshow('OpenCV Feed', frame)
+        # frame_slot.image(frame, channels="BGR", use_column_width=True)
 
         # Break gracefully
         if cv2.waitKey(10) & 0xFF == ord('q'):
